@@ -45,14 +45,15 @@ class ViewCommand extends Command
         }
 
         $model_res = self::createModel($name);
+        $model_res = self::createMigration($name);
 
         if ($model_res) {
             $controller_res = self::createControllerRequest($name, $type);
 
             if ($controller_res) {
-                self::createViews($name);
-                self::updateRoutes($name);
-                $this->info("Views Created! Happy Coding :)");
+                self::createViews($name, $type);
+                self::updateRoutes($name, $type);
+                $this->info($name." - Views, Controller, Model and Migration Created! Happy Coding :)");
             } else {
                 $this->info("Controller exists!");
             }
@@ -77,6 +78,30 @@ class ViewCommand extends Command
         $model_structure_file = str_replace('TABLE_NAME', strtolower($name), $model_structure_file);
 
         file_put_contents($model_file, $model_structure_file);
+        return true;
+    }
+
+    public static function createMigration($name)
+    {
+        if (!File::exists(base_path('database'))) {
+            File::makeDirectory(base_path('database'));
+        }
+
+        if (!File::exists(base_path('database/migrations'))) {
+            File::makeDirectory(base_path('database/migrations'));
+        }
+
+        $title = date('Y_m_d').'_create_'.strtolower($name).'s_table.php';
+
+        $migration_file = base_path('database/migrations/'.$title); // the file to change
+        if (file_exists($migration_file)) {
+            return false;
+        }
+
+        $migration_structure_file = file_get_contents(app_path()."/Console/Commands/View/ViewMigration.txt");
+        $migration_structure_file = str_replace('TABLE_NAME', strtolower($name), $migration_structure_file);
+
+        file_put_contents($migration_file, $migration_structure_file);
         return true;
     }
 
@@ -114,7 +139,7 @@ class ViewCommand extends Command
         if($type == 'page') {
             $controller_structure_file = file_get_contents(app_path()."/Console/Commands/View/page/ViewController.txt");
         }
-        elseif($type == 'page') {
+        elseif($type == 'modal') {
             $controller_structure_file = file_get_contents(app_path()."/Console/Commands/View/modal/ViewController.txt");
         }
 
@@ -131,7 +156,7 @@ class ViewCommand extends Command
             if($type == 'page') {
                 $request_structure_file = file_get_contents(app_path()."/Console/Commands/View/page/ViewRequest.txt");
             }
-            elseif($type == 'page') {
+            elseif($type == 'modal') {
                 $request_structure_file = file_get_contents(app_path()."/Console/Commands/View/modal/ViewRequest.txt");
             }
             $request_structure_file = str_replace('REPO_NAME', $name, $request_structure_file);
@@ -155,7 +180,7 @@ class ViewCommand extends Command
         if($type == 'page') {
             $index_structure_file = file_get_contents(app_path()."/Console/Commands/View/page/index.txt");
         }
-        elseif($type == 'page') {
+        elseif($type == 'modal') {
             $index_structure_file = file_get_contents(app_path()."/Console/Commands/View/modal/index.txt");
         }
         $index_structure_file = str_replace('TITLE_NAME', $TITLE_NAME, $index_structure_file);
@@ -166,7 +191,7 @@ class ViewCommand extends Command
         if($type == 'page') {
             $create_structure_file = file_get_contents(app_path()."/Console/Commands/View/page/createUpdate.txt");
         }
-        elseif($type == 'page') {
+        elseif($type == 'modal') {
             $create_structure_file = file_get_contents(app_path()."/Console/Commands/View/modal/createUpdate.txt");
         }
         $create_structure_file = str_replace('TITLE_NAME', $TITLE_NAME, $create_structure_file);
