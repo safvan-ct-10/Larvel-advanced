@@ -36,5 +36,33 @@ Route::group(['middleware' => 'admin', 'prefix' => 'backend-admin', 'namespace' 
         //'middleware' => ['checkPrivilege:user'],
     ]);
 
+    
+    // Location
+    Route::get('location', [
+        'as' => 'location.index',
+        'uses' => 'LocationController@index',
+        //'middleware' => ['checkPrivilege:location'],
+    ]);
+    Route::get('location/list', [
+        'as' => 'location.list',
+        'uses' => 'LocationController@result',
+        //'middleware' => ['checkPrivilege:location'],
+    ]);
+    Route::get('location/create-update/{id?}', [
+        'as' => 'location.create.update',
+        'uses' => 'LocationController@createUpdate',
+        //'middleware' => ['checkPrivilege:location'],
+    ]);
+    Route::post('location/create-update', [
+        'as' => 'location.create.update.post',
+        'uses' => 'LocationController@createUpdatePost',
+        //'middleware' => ['checkPrivilege:location'],
+    ]);
+    Route::get('location/action/{id}/{status}', [
+        'as' => 'location.action',
+        'uses' => 'LocationController@action',
+        //'middleware' => ['checkPrivilege:location'],
+    ]);
+
     //ViewStructureDontRemoveThisLine
 });

@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @section('page_title')
-    TITLE_NAME
+    Location
 @endsection
 
 @section('content')
@@ -34,7 +34,7 @@
             </div>
         </div>
     </div>
-    <span class='d-none datatable_status'>{{ route('ROUTE_NAME.action', ['ID', 'STATUS']) }}</span>
+    <span class='d-none datatable_status'>{{ route('location.action', ['ID', 'STATUS']) }}</span>
 
     <div class="modal fade" id="createUpdateModal" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-dialog" role="document">
@@ -58,7 +58,7 @@
                 destroy: true,
                 processing: true,
                 serverSide: true,
-                ajax: "{{ route('ROUTE_NAME.list') }}",
+                ajax: "{{ route('location.list') }}",
                 columns: [
                     { data: 'DT_RowIndex', name: 'DT_RowIndex' , orderable: false, searchable: false},
                     { data: 'name', name: 'name' },
@@ -71,7 +71,7 @@
         });
 
         function createUpdateForm(id) {
-            url = "{{ route('ROUTE_NAME.create.update', ['ID']) }}";
+            url = "{{ route('location.create.update', ['ID']) }}";
             url = url.replace(/ID/g, id);
 
             $.ajax({
@@ -108,7 +108,7 @@
                     }
                     if(data.response == 'success') {
                         $('#createUpdateModal').modal('toggle');
-                        notification('success', data.message);
+                        notification('success', data.message)
                         $("#datatable").DataTable().draw(false);
                     }
                 },
