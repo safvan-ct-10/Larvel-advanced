@@ -111,12 +111,6 @@
                             <span class="menu-title">Users</span>
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ route('test.index') }}">
-                            <i class="icon-contract menu-icon"></i>
-                            <span class="menu-title">Countries</span>
-                        </a>
-                    </li>
                 </ul>
             </nav>
 
