@@ -34,7 +34,7 @@ if (!function_exists('actionButtons')) {
 
             // Edit Button Ajax
             elseif ($k == "editAjax") {
-                $html[] = "<a href='javascript:void(0)' class='text-primary m-1' title='Edit' onclick='{$v["function"]}({$v["id"]})' style='font-size: 25px;'>
+                $html[] = "<a href='javascript:void(0)' class='text-primary m-1' title='Edit' onclick='createUpdateForm({$v["id"]})' style='font-size: 25px;'>
                 <i class='fa-action fa fa-edit'></i></a>";
             }
 

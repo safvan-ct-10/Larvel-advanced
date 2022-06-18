@@ -27,7 +27,7 @@
                                     name="name" required>
                             </div>
                         </div>
-                        <button type="submit" class="btn btn-primary float-right">{{ empty($obj->id) ? 'SAVE' : 'UPDATE' }}</button>
+                        <button type="submit" class="btn btn-primary float-right">{{ empty($obj->id) ? 'Save' : 'Update' }}</button>
                     </form>
                 </div>
             </div>

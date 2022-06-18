@@ -12,14 +12,14 @@ class ViewCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'make:view {repo_name} {type}'; // page or model
+    protected $signature = 'make:view {repo_name} {type}'; // page or modal
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Create New View and Controller - Specify type page or model';
+    protected $description = 'Create New View and Controller - Specify type page or modal';
 
     /**
      * Execute the console command.
@@ -47,7 +47,7 @@ class ViewCommand extends Command
         $model_res = self::createModel($name);
 
         if ($model_res) {
-            $controller_res = self::createControllerRequest($name);
+            $controller_res = self::createControllerRequest($name, $type);
 
             if ($controller_res) {
                 self::createViews($name);
@@ -80,7 +80,7 @@ class ViewCommand extends Command
         return true;
     }
 
-    public static function createControllerRequest($name)
+    public static function createControllerRequest($name, $type)
     {
         if (!File::exists(app_path('Http'))) {
             File::makeDirectory(app_path('Http'));
@@ -111,7 +111,13 @@ class ViewCommand extends Command
         $PERMISSION_NAME = strtolower(implode("_", $parts));
         $ROUTE_NAME = strtolower(implode(".", $parts));
 
-        $controller_structure_file = file_get_contents(app_path()."/Console/Commands/View/ViewController.txt");
+        if($type == 'page') {
+            $controller_structure_file = file_get_contents(app_path()."/Console/Commands/View/page/ViewController.txt");
+        }
+        elseif($type == 'page') {
+            $controller_structure_file = file_get_contents(app_path()."/Console/Commands/View/modal/ViewController.txt");
+        }
+
         $controller_structure_file = str_replace('REPO_NAME', $name, $controller_structure_file);
         $controller_structure_file = str_replace('ROUTE_NAME', $ROUTE_NAME, $controller_structure_file);
         $controller_structure_file = str_replace('PERMISSION_NAME', $PERMISSION_NAME, $controller_structure_file);
@@ -119,9 +125,15 @@ class ViewCommand extends Command
 
         file_put_contents($controller_file, $controller_structure_file);
 
+
         $request_file = app_path('Http/Requests/Admin/'.$name.'Request.php'); // the file to change
         if (!file_exists($request_file)) {
-            $request_structure_file = file_get_contents(app_path()."/Console/Commands/View/ViewRequest.txt");
+            if($type == 'page') {
+                $request_structure_file = file_get_contents(app_path()."/Console/Commands/View/page/ViewRequest.txt");
+            }
+            elseif($type == 'page') {
+                $request_structure_file = file_get_contents(app_path()."/Console/Commands/View/modal/ViewRequest.txt");
+            }
             $request_structure_file = str_replace('REPO_NAME', $name, $request_structure_file);
             file_put_contents($request_file, $request_structure_file);
         }
@@ -129,7 +141,7 @@ class ViewCommand extends Command
         return true;
     }
 
-    public static function createViews($name)
+    public static function createViews($name, $type)
     {
         $index_file = resource_path('views/admin/'.lcfirst($name).'/index.blade.php');
 
@@ -140,13 +152,23 @@ class ViewCommand extends Command
         $ROUTE_NAME = implode(".", $parts);
         $ROUTE_NAME = strtolower($ROUTE_NAME);
 
-        $index_structure_file = file_get_contents(app_path()."/Console/Commands/View/index.txt");
+        if($type == 'page') {
+            $index_structure_file = file_get_contents(app_path()."/Console/Commands/View/page/index.txt");
+        }
+        elseif($type == 'page') {
+            $index_structure_file = file_get_contents(app_path()."/Console/Commands/View/modal/index.txt");
+        }
         $index_structure_file = str_replace('TITLE_NAME', $TITLE_NAME, $index_structure_file);
         $index_structure_file = str_replace('ROUTE_NAME', $ROUTE_NAME, $index_structure_file);
         file_put_contents($index_file, $index_structure_file);
 
         $create_file = resource_path('views/admin/'.lcfirst($name).'/create-update.blade.php');
-        $create_structure_file = file_get_contents(app_path()."/Console/Commands/View/createUpdate.txt");
+        if($type == 'page') {
+            $create_structure_file = file_get_contents(app_path()."/Console/Commands/View/page/createUpdate.txt");
+        }
+        elseif($type == 'page') {
+            $create_structure_file = file_get_contents(app_path()."/Console/Commands/View/modal/createUpdate.txt");
+        }
         $create_structure_file = str_replace('TITLE_NAME', $TITLE_NAME, $create_structure_file);
         $create_structure_file = str_replace('ROUTE_NAME', $ROUTE_NAME, $create_structure_file);
         file_put_contents($create_file, $create_structure_file);
@@ -173,27 +195,27 @@ class ViewCommand extends Command
     Route::get('ROUTE_GET_NAME', [
         'as' => 'ROUTE_NAME.index',
         'uses' => 'REPO_NAMEController@index',
-        'middleware' => ['checkPrivilege:PERMISSION_NAME'],
+        //'middleware' => ['checkPrivilege:PERMISSION_NAME'],
     ]);
     Route::get('ROUTE_GET_NAME/list', [
         'as' => 'ROUTE_NAME.list',
         'uses' => 'REPO_NAMEController@result',
-        'middleware' => ['checkPrivilege:PERMISSION_NAME'],
+        //'middleware' => ['checkPrivilege:PERMISSION_NAME'],
     ]);
     Route::get('ROUTE_GET_NAME/create-update/{id?}', [
         'as' => 'ROUTE_NAME.create.update',
         'uses' => 'REPO_NAMEController@createUpdate',
-        'middleware' => ['checkPrivilege:PERMISSION_NAME'],
+        //'middleware' => ['checkPrivilege:PERMISSION_NAME'],
     ]);
     Route::post('ROUTE_GET_NAME/create-update', [
         'as' => 'ROUTE_NAME.create.update.post',
         'uses' => 'REPO_NAMEController@createUpdatePost',
-        'middleware' => ['checkPrivilege:PERMISSION_NAME'],
+        //'middleware' => ['checkPrivilege:PERMISSION_NAME'],
     ]);
     Route::get('ROUTE_GET_NAME/action/{id}/{status}', [
         'as' => 'ROUTE_NAME.action',
         'uses' => 'REPO_NAMEController@action',
-        'middleware' => ['checkPrivilege:PERMISSION_NAME'],
+        //'middleware' => ['checkPrivilege:PERMISSION_NAME'],
     ]);
 
     //ViewStructureDontRemoveThisLine";
