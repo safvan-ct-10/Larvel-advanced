@@ -17,9 +17,11 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('email', 128)->unique();
-            $table->bigInteger('role_id');
+            $table->string('dob');
+            $table->bigInteger('role_id')->default(1)->comment('1 - Super admin, 2 - Admin, 3 - Dev, 4 - User');
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->tinyInteger('is_active')->default(1);
             $table->rememberToken();
             $table->timestamps();
         });

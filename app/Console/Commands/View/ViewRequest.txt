@@ -7,34 +7,24 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Auth;
 
 class REPO_NAMERequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     *
-     * @return bool
-     */
     public function authorize()
     {
-        return \Auth::check();
+        return Auth::check();
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array
-     */
     public function rules()
     {
-        return [
+        $rules =  [
             'id' => 'required|max:20',
-            'name' => [
-                'required',
-                'max:255',
-                Rule::unique('table_name', 'name')->whereNull('deleted_at')->ignore($this->id)
-            ]
+            'name' => 'required','max:255',
+            'email' => 'required|email|unique:users,email,'.$this->id,
         ];
+
+        return $rules;
     }
 
     public function messages()
@@ -43,6 +33,7 @@ class REPO_NAMERequest extends FormRequest
 
         ];
     }
+
     protected function prepareForValidation()
     {
         $data = cleanRequest($this->rules(), $this);

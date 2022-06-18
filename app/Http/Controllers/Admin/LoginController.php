@@ -10,7 +10,7 @@ class LoginController extends Controller
     public function index()
     {
         if(auth()->check()) {
-            return redirect()->route('admin.home');
+            return redirect()->route('admin.dashboard');
         }
         return view('admin.login');
     }
@@ -24,7 +24,7 @@ class LoginController extends Controller
         $remember = $request->has('remember') ? true : false;
 
         if(auth()->attempt($data, $remember)) {
-            return redirect()->route('admin.home');
+            return redirect()->route('admin.dashboard');
         }
         return redirect()->route('admin.login')->with('error', 'Invalid Login!');
     }

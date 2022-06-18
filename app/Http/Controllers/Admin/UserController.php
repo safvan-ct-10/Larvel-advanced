@@ -3,40 +3,29 @@
 namespace App\Http\Controllers\Admin;
 
 use DataTables;
-
 use App\Http\Controllers\Controller;
+use App\Models\User;
+use App\Http\Requests\Admin\UserRequest;
 
-use App\Data\Repositories\REPO_NAME\REPO_NAMERepository;
-
-use App\Http\Requests\Admin\REPO_NAMERequest;
-
-class REPO_NAMEController extends Controller
+class UserController extends Controller
 {
-    private static $REPO_NAMERepository;
-
-    public function __construct(REPO_NAMERepository $REPO_NAMERepository)
-    {
-        self::$REPO_NAMERepository = $REPO_NAMERepository;
-    }
-
     public function index()
     {
-
-        $active = "PERMISSION_NAME";
+        $active = "user";
         $active_sub = "";
 
-        return view('admin.FOLDER_NAME.index')
+        return view('admin.user.index')
             ->with("active", $active)
             ->with("active_sub", $active_sub);
     }
 
     public function result()
     {
-        $results = self::$REPO_NAMERepository->dataTable();
+        $results = User::latest()->get();
         return DataTables::of($results)
             ->addColumn('action', function ($result) {
                 $buttons = [
-                    "edit" => route('ROUTE_NAME.create.update', [$result->id]),
+                    "edit" => route('user.create.update', [$result->id]),
                     "status" => [
                         "id" => $result->id,
                         "status" => $result->is_active,
@@ -58,44 +47,45 @@ class REPO_NAMEController extends Controller
 
     public function createUpdate($id = 0)
     {
-        $active = "PERMISSION_NAME";
+        $active = "user";
         $active_sub = "";
 
         if ($id==0) {
-            $obj = self::$REPO_NAMERepository->getDummy();
+            $obj = new User;
         } else {
-            $obj = self::$REPO_NAMERepository->all([
-                ["id",$id]
-            ]);
+            $obj = User::find($id);
             if (is_null($obj)) {
-                return redirect()->route('ROUTE_NAME.index')->with('error', returnMsg('404'));
+                return redirect()->route('user.index')->with('error', returnMsg('404'));
             }
         }
 
-        return view('admin.FOLDER_NAME.createUpdate')
+        return view('admin.user.create-Update')
             ->with("obj", $obj)
             ->with("active", $active)
             ->with("active_sub", $active_sub);
     }
-    public function createUpdatePost(REPO_NAMERequest $request)
+    public function createUpdatePost(UserRequest $request)
     {
         $data = $request->all();
+
         $obj = null;
         if ($data["id"] !=0) {
-            $obj = self::$REPO_NAMERepository->all([
-                ["id",$data["id"]]
-            ]);
+            $obj = User::find($data["id"]);
             if (is_null($obj)) {
-                return redirect()->route('ROUTE_NAME.index')->with('error', returnMsg('404'));
+                return redirect()->route('user.index')->with('error', returnMsg('404'));
             }
         }
 
+        if(is_null($data['password'])) {
+            unset($data['password']);
+        }
+
         if (is_null($obj)) {
-            $res = self::$REPO_NAMERepository->create($data);
-            return redirect()->route('ROUTE_NAME.create.update', [$res->id])->with('success', returnMsg('201'));
+            $res = User::create($data);
+            return redirect()->route('user.create.update', [$res->id])->with('success', returnMsg('201'));
         } else {
-            self::$REPO_NAMERepository->update($data, [["id", $obj->id]]);
-            return redirect()->route('ROUTE_NAME.create.update', [$obj->id])->with('success', returnMsg());
+            $obj->update($data);
+            return redirect()->route('user.create.update', [$obj->id])->with('success', returnMsg());
         }
     }
 
@@ -105,9 +95,12 @@ class REPO_NAMEController extends Controller
         $status = clean($status);
 
         if (in_array($status, [0,1])) {
-            self::$REPO_NAMERepository->enableDisable($id, $status);
+            User::where("id",$id)->update(['is_active' => $status]);
         } elseif (in_array($status, [2])) {
-            self::$REPO_NAMERepository->delete([["id", $id]]);
+            $obj = User::find($id);
+            if (!is_null($obj)) {
+                $obj->delete();
+            }
         }
 
         return json_encode(['response' => 'success', 'message' =>  returnMsg()]);

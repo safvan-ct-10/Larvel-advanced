@@ -3,25 +3,14 @@
 namespace App\Http\Controllers\Admin;
 
 use DataTables;
-
 use App\Http\Controllers\Controller;
-
-use App\Data\Repositories\REPO_NAME\REPO_NAMERepository;
-
+use App\Models\REPO_NAME;
 use App\Http\Requests\Admin\REPO_NAMERequest;
 
 class REPO_NAMEController extends Controller
 {
-    private static $REPO_NAMERepository;
-
-    public function __construct(REPO_NAMERepository $REPO_NAMERepository)
-    {
-        self::$REPO_NAMERepository = $REPO_NAMERepository;
-    }
-
     public function index()
     {
-
         $active = "PERMISSION_NAME";
         $active_sub = "";
 
@@ -32,7 +21,7 @@ class REPO_NAMEController extends Controller
 
     public function result()
     {
-        $results = self::$REPO_NAMERepository->dataTable();
+        $results = REPO_NAME::latest()->get();
         return DataTables::of($results)
             ->addColumn('action', function ($result) {
                 $buttons = [
@@ -62,17 +51,15 @@ class REPO_NAMEController extends Controller
         $active_sub = "";
 
         if ($id==0) {
-            $obj = self::$REPO_NAMERepository->getDummy();
+            $obj = new REPO_NAME;
         } else {
-            $obj = self::$REPO_NAMERepository->all([
-                ["id",$id]
-            ]);
+            $obj = REPO_NAME::find($data["id"]);
             if (is_null($obj)) {
                 return redirect()->route('ROUTE_NAME.index')->with('error', returnMsg('404'));
             }
         }
 
-        return view('admin.FOLDER_NAME.createUpdate')
+        return view('admin.FOLDER_NAME.create-Update')
             ->with("obj", $obj)
             ->with("active", $active)
             ->with("active_sub", $active_sub);
@@ -82,19 +69,17 @@ class REPO_NAMEController extends Controller
         $data = $request->all();
         $obj = null;
         if ($data["id"] !=0) {
-            $obj = self::$REPO_NAMERepository->all([
-                ["id",$data["id"]]
-            ]);
+            $obj = REPO_NAME::find($id);
             if (is_null($obj)) {
                 return redirect()->route('ROUTE_NAME.index')->with('error', returnMsg('404'));
             }
         }
 
         if (is_null($obj)) {
-            $res = self::$REPO_NAMERepository->create($data);
+            $res = REPO_NAME::create($data);
             return redirect()->route('ROUTE_NAME.create.update', [$res->id])->with('success', returnMsg('201'));
         } else {
-            self::$REPO_NAMERepository->update($data, [["id", $obj->id]]);
+            $obj->update($data);
             return redirect()->route('ROUTE_NAME.create.update', [$obj->id])->with('success', returnMsg());
         }
     }
@@ -105,9 +90,12 @@ class REPO_NAMEController extends Controller
         $status = clean($status);
 
         if (in_array($status, [0,1])) {
-            self::$REPO_NAMERepository->enableDisable($id, $status);
+            REPO_NAME::where("id",$id)->update(['is_active' => $status]);
         } elseif (in_array($status, [2])) {
-            self::$REPO_NAMERepository->delete([["id", $id]]);
+            $obj = REPO_NAME::find($id);
+            if (!is_null($obj)) {
+                $obj->delete();
+            }
         }
 
         return json_encode(['response' => 'success', 'message' =>  returnMsg()]);
