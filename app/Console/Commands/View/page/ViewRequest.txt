@@ -1,0 +1,42 @@
+<?php
+
+namespace App\Http\Requests\Admin;
+
+use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Validation\ValidationException;
+use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Auth;
+
+class REPO_NAMERequest extends FormRequest
+{
+    public function authorize()
+    {
+        return Auth::check();
+    }
+
+    public function rules()
+    {
+        $rules =  [
+            'id' => 'required|max:20',
+            'name' => 'required','max:255',
+            'email' => 'required|email|unique:users,email,'.$this->id,
+        ];
+
+        return $rules;
+    }
+
+    public function messages()
+    {
+        return [
+
+        ];
+    }
+
+    protected function prepareForValidation()
+    {
+        $data = cleanRequest($this->rules(), $this);
+        $this->replace($data);
+    }
+}

@@ -1,0 +1,103 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use DataTables;
+use App\Http\Controllers\Controller;
+use App\Models\REPO_NAME;
+use App\Http\Requests\Admin\REPO_NAMERequest;
+
+class REPO_NAMEController extends Controller
+{
+    public function index()
+    {
+        $active = "PERMISSION_NAME";
+        $active_sub = "";
+
+        return view('admin.FOLDER_NAME.index')
+            ->with("active", $active)
+            ->with("active_sub", $active_sub);
+    }
+
+    public function result()
+    {
+        $results = REPO_NAME::latest()->get();
+        return DataTables::of($results)
+            ->addColumn('action', function ($result) {
+                $buttons = [
+                    "editAjax" => [
+                        'id' => $result->id,
+                    ],
+                    "status" => [
+                        "id" => $result->id,
+                        "status" => $result->is_active,
+                        "datatable_id" => "datatable",
+                    ],
+                    "delete" => [
+                        "id" => $result->id,
+                        "datatable_id" => "datatable",
+                    ],
+                ];
+                return actionButtons($buttons);
+            })
+            ->addIndexColumn()
+            ->escapeColumns([])
+            ->setRowId('id')
+            ->make(true);
+    }
+
+
+    public function createUpdate($id = 0)
+    {
+        if ($id==0) {
+            $obj = new REPO_NAME;
+        } else {
+            $obj = REPO_NAME::find($id);
+            if (is_null($obj)) {
+                return json_encode(['response' => 'success', 'message' => returnMsg('404')]);
+            }
+        }
+
+        $view = view('admin.FOLDER_NAME.create-Update')->with("obj", $obj)->render();
+        return json_encode(['response' => 'success', 'message' => $view]);
+    }
+    public function createUpdatePost(REPO_NAMERequest $request)
+    {
+        $data = $request->all();
+        $obj = null;
+        if ($data["id"] !=0) {
+            $obj = REPO_NAME::find($data["id"]);
+            if (is_null($obj)) {
+                return json_encode(['response' => 'error', 'message' => returnMsg('404')]);
+            }
+        }
+
+        if (is_null($obj)) {
+            REPO_NAME::create($data);
+            return json_encode(['response' => 'success', 'message' => returnMsg('201')]);
+        } else {
+            $obj->update($data);
+            return json_encode(['response' => 'success', 'message' => returnMsg()]);
+        }
+    }
+
+    public function action($id, $status)
+    {
+        $id = clean($id);
+        $status = clean($status);
+        $obj = REPO_NAME::find($id);
+        if (is_null($obj)) {
+            return json_encode(['response' => 'error', 'message' => returnMsg('404')]);
+        }
+
+        if (!is_null($obj)) {
+            if (in_array($status, [0,1])) {
+                $obj->update(['is_active' => $status]);
+            } elseif (in_array($status, [2])) {
+                $obj->delete();
+            }
+        }
+
+        return json_encode(['response' => 'success', 'message' =>  returnMsg()]);
+    }
+}

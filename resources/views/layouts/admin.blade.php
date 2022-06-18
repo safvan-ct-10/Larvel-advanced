@@ -20,6 +20,7 @@
     <link rel="stylesheet" href="{{ asset('admin') }}/css/vertical-layout-light/style.css">
     <!-- endinject -->
     <link rel="shortcut icon" href="images/favicon.png" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
 </head>
 
 <body>
@@ -27,9 +28,9 @@
         <!-- partial:partials/_navbar.html -->
         <nav class="navbar col-lg-12 col-12 p-0 fixed-top d-flex flex-row">
             <div class="text-center navbar-brand-wrapper d-flex align-items-center justify-content-center">
-                <a class="navbar-brand brand-logo mr-5" href="{{ route('admin.home') }}"><img
+                <a class="navbar-brand brand-logo mr-5" href="{{ route('admin.dashboard') }}"><img
                         src="{{ asset('admin') }}/images/logo.svg" class="mr-2" alt="logo" /></a>
-                <a class="navbar-brand brand-logo-mini" href="{{ route('admin.home') }}"><img
+                <a class="navbar-brand brand-logo-mini" href="{{ route('admin.dashboard') }}"><img
                         src="{{ asset('admin') }}/images/logo-mini.svg" alt="logo" /></a>
             </div>
             <div class="navbar-menu-wrapper d-flex align-items-center justify-content-end">
@@ -99,21 +100,21 @@
             <nav class="sidebar sidebar-offcanvas" id="sidebar">
                 <ul class="nav">
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ route('admin.home') }}">
+                        <a class="nav-link" href="{{ route('admin.dashboard') }}">
                             <i class="icon-grid menu-icon"></i>
                             <span class="menu-title">Dashboard</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="">
+                        <a class="nav-link" href="{{ route('user.index') }}">
                             <i class="icon-head menu-icon"></i>
                             <span class="menu-title">Users</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="">
+                        <a class="nav-link" href="{{ route('location.index') }}">
                             <i class="icon-contract menu-icon"></i>
-                            <span class="menu-title">Countries</span>
+                            <span class="menu-title">Locations</span>
                         </a>
                     </li>
                 </ul>
@@ -122,20 +123,9 @@
             <div class="main-panel">
 
                 <div class="content-wrapper">
-                    @if (Session::has('success'))
-                        <div class="alert alert-success alert-dismissible fade show" role="alert">
-                            <strong>Success !</strong> {{ Session::get('success') }}
-                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                    @elseif (Session::has('error'))
-                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                            <strong>Error !</strong> {{ Session::get('error') }}
-                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
+                    <!-- Notification -->
+                    @if ($errors->any())
+                        <div style="display:none" id="error_list">{!! implode('<br/>', $errors->all()) !!}</div>
                     @endif
 
                     @yield('content')
@@ -173,35 +163,35 @@
     <script src="{{ asset('admin') }}/js/settings.js"></script>
     <script src="{{ asset('admin') }}/js/todolist.js"></script>
     <!-- endinject -->
+
+    <!-- Toastr -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.0.1/css/toastr.css" rel="stylesheet"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.0.1/js/toastr.js"></script>
+
+    <!-- Sweetalert -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <!-- Custom js for this page-->
     <script src="{{ asset('admin') }}/js/dashboard.js"></script>
     <script src="{{ asset('admin') }}/js/Chart.roundedBarCharts.js"></script>
+    <script src="{{ asset('admin') }}/js/custom.js"></script>
     <!-- End custom js for this page-->
 
-    @yield('scripts')
-    <!-- Pusher Service -->
-    <script src="https://js.pusher.com/7.0/pusher.min.js"></script>
+    @yield('script')
     <script>
-        // Enable pusher logging - don't include this in production
-        //Pusher.logToConsole = true;
+        $(document).ready(function() {
+            @if (Session::has('error'))
+                notification("error", "{!! Session::get('error') !!}");
+            @endif
 
-        var pusher = new Pusher('e1db95d5073dbb3fe5ed', {
-            cluster: 'ap2'
-        });
+            @if ($errors->any())
+                notification("error", $("#error_list").html());
+            @endif
 
-        var channel = pusher.subscribe('user-create');
-
-        channel.bind('user-create-event', function(data) {
-            $('#notif_status').show();
-            var newHTML = '';
-            $.each(data.data, function(key, val) {
-                $('#notif_result').empty();
-                newHTML = newHTML +
-                    '<a class="dropdown-item preview-item"> <div class="preview-thumbnail"> <div class="preview-icon bg-info"> <i class="ti-user mx-0"></i> </div> </div> <div class="preview-item-content"> <h6 class="preview-subject font-weight-normal">' +
-                    val.name +
-                    '</h6> <p class="font-weight-light small-text mb-0 text-muted">'+ val.human_days +'</p> </div> </a>';
-            });
-            $("#notif_result").append(newHTML);
+            @if (Session::has('success'))
+                notification("success", "{!! Session::get('success') !!}");
+            @endif
         });
     </script>
 </body>
